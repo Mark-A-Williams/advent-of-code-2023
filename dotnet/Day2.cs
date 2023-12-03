@@ -6,8 +6,23 @@ public class Day2
     {
         var lines = File.ReadAllLines("../inputs/2.txt");
 
-        // Possible shortcut: immediately filter out all lines which contain a number
-        // greater than the largest of the numbers of available cubes
+        // This pre-filtering cut it from about 70 to 40ms. Huge.
+        lines = lines.Where(line =>
+        {
+            var pairwiseChars = line.Zip(line.Skip(1), (a, b) => (a, b));
+            return pairwiseChars.Any(o =>
+            {
+                if (int.TryParse(o.a.ToString(), out var tens)
+                    && int.TryParse(o.b.ToString(), out var units)
+                    && tens * 10 + units > 14)
+                {
+                    return false;
+                }
+
+                return true;
+            });
+        }).ToArray();
+
         var games = lines.Select(line =>
         {
             var segments = line.Split(": ");
@@ -31,9 +46,7 @@ public class Day2
             return new Game(id, draws.ToList());
         });
 
-        var possibleGames = games.Where(o => o.IsPossible(12, 13, 14));
-        foreach (var g in possibleGames) Console.WriteLine(g);
-        return possibleGames.Sum(o => o.Id);
+        return games.Where(o => o.IsPossible(12, 13, 14)).Sum(o => o.Id);
     }
 
     private record Game(int Id, ICollection<Draw> Draws)
