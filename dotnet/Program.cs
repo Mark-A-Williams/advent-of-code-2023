@@ -1,2 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using AOC2023.Net;
+
+var result = Day1.Execute();
+
+Console.WriteLine(result);
