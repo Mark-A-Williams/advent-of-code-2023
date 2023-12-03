@@ -23,7 +23,22 @@ public class Day2
             });
         }).ToArray();
 
-        var games = lines.Select(line =>
+        var games = GetGamesFromInputLines(lines);
+
+        return games.Where(o => o.IsPossible(12, 13, 14)).Sum(o => o.Id);
+    }
+
+    public static int ExecutePart2()
+        => GetGamesFromInputLines(File.ReadAllLines("../inputs/2.txt"))
+            .Select(game =>
+            {
+                var requirements = game.GetMinimumCubeRequirements();
+                return requirements[Colour.Red] * requirements[Colour.Green] * requirements[Colour.Blue];
+            })
+            .Sum();
+
+    private static ICollection<Game> GetGamesFromInputLines(string[] lines)
+    => lines.Select(line =>
         {
             var segments = line.Split(": ");
             var id = int.Parse(segments[0].Split(" ")[1].ToString());
@@ -44,10 +59,7 @@ public class Day2
                         o => o.Count)));
 
             return new Game(id, draws.ToList());
-        });
-
-        return games.Where(o => o.IsPossible(12, 13, 14)).Sum(o => o.Id);
-    }
+        }).ToList();
 
     private record Game(int Id, ICollection<Draw> Draws)
     {
@@ -66,6 +78,13 @@ public class Day2
 
             return true;
         }
+
+        public Dictionary<Colour, int> GetMinimumCubeRequirements()
+            => Draws
+                .SelectMany(d => d.ColourCounts)
+                .GroupBy(o => o.Key)
+                .Select(o => o.MaxBy(p => p.Value))
+                .ToDictionary(o => o.Key, o => o.Value);
     }
 
     private record Draw(Dictionary<Colour, int> ColourCounts);
