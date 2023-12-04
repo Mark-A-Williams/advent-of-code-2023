@@ -6,18 +6,7 @@ public class Day3
 {
     public static int ExecutePart1()
     {
-        // Prep format, padded with first and last line of dots to allow "triowise" operation.
-        var lines = File.ReadAllLines("../inputs/3.txt");
-        var lineLength = lines.First().Length;
-        var lineOfDots = string.Concat(Enumerable.Range(0, lineLength).Select(o => '.'));
-
-        var allLines = new List<string>
-        {
-            lineOfDots
-        };
-
-        allLines.AddRange(lines);
-        allLines.Add(lineOfDots);
+        var allLines = GetLinesPaddedWithDots();
 
         var triowiseLines = allLines.Zip(allLines.Skip(1).Zip(allLines.Skip(2)))
             .Select(o => new { Previous = o.First, Current = o.Second.First, Next = o.Second.Second });
@@ -50,17 +39,12 @@ public class Day3
                     {
                         var numberValue = int.Parse(string.Concat(digitBuffer));
                         total += numberValue;
-                        //Console.WriteLine(numberValue);
                     }
-
-                    //Console.WriteLine($"Number {string.Concat(digitBuffer)}, adjacents {adjacentCharacters}");
-                    //Console.WriteLine("---------------------------------------------------");
 
                     digitBuffer.Clear();
                     numberStartIndex = null;
                 }
             }
-
         }
 
         return total;
@@ -69,5 +53,22 @@ public class Day3
     public static int ExecutePart2()
     {
         throw new NotImplementedException();
+    }
+
+    private static List<string> GetLinesPaddedWithDots()
+    {
+        var lines = File.ReadAllLines("../inputs/3.txt");
+        var lineLength = lines.First().Length;
+        var lineOfDots = string.Concat(Enumerable.Range(0, lineLength).Select(o => '.'));
+
+        var allLines = new List<string>
+        {
+            lineOfDots
+        };
+
+        allLines.AddRange(lines);
+        allLines.Add(lineOfDots);
+
+        return allLines.Select(o => "." + o + ".").ToList();
     }
 }
