@@ -10,26 +10,24 @@ public class Day4
 
     public static int ExecutePart2()
     {
-        var allCards = File.ReadAllLines("../inputs/4.txt")
+        var startingCards = File.ReadAllLines("../inputs/4.txt")
             .Select(ParseCardFromLine)
             .ToList();
 
-        var highestId = allCards.Max(card => card.Id);
+        var countsOfCardsById = startingCards.ToDictionary(o => o.Id, o => 1);
 
-        for (int i = 1; i <= highestId; i++)
+        foreach (var card in startingCards)
         {
-            var countOfThisCard = allCards.Count(c => c.Id == i);
-            var card = allCards.First(c => c.Id == i);
+            var numberToGoUp = card.MatchingNumbersCount;
+            var currentCountOfThisCard = countsOfCardsById[card.Id];
 
-            var cardsToClone = allCards.Where(c => c.Id > i && c.Id <= i + card.MatchingNumbersCount)
-                .GroupBy(c => c.Id)
-                .Select(grouping => grouping.First())
-                .ToList();
-
-            for (int j = 0; j < countOfThisCard; j++) allCards.AddRange(cardsToClone);
+            foreach (var entry in countsOfCardsById.Where(o => o.Key > card.Id && o.Key <= card.Id + numberToGoUp))
+            {
+                countsOfCardsById[entry.Key] = entry.Value + currentCountOfThisCard;
+            }
         }
 
-        return allCards.Count;
+        return countsOfCardsById.Sum(o => o.Value);
     }
 
     private static Card ParseCardFromLine(string inputLine)
