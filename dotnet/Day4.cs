@@ -6,7 +6,7 @@ public class Day4
         => File.ReadAllLines("../inputs/4.txt")
             .Select(ParseCardFromLine)
             .ToArray()
-            .Sum(card => card.GetScore());
+            .Sum(card => card.Score);
 
     public static int ExecutePart2()
     {
@@ -35,12 +35,13 @@ public class Day4
 
     private record Card(ICollection<int> WinningNumbers, ICollection<int> MyNumbers)
     {
-        public int GetScore()
+        public int MatchingNumbers { get => WinningNumbers.Count(MyNumbers.Contains); }
+
+        public int Score
         {
-            var matchingNumbers = WinningNumbers.Count(MyNumbers.Contains);
-            return matchingNumbers == 0
+            get => MatchingNumbers == 0
                 ? 0
-                : Convert.ToInt32(Math.Pow(2, WinningNumbers.Count(MyNumbers.Contains) - 1));
+                : Convert.ToInt32(Math.Pow(2, MatchingNumbers - 1));
         }
     }
 }
