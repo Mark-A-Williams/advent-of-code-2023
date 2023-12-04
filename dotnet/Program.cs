@@ -2,7 +2,7 @@
 
 var start = DateTime.Now;
 
-var result = Day4.ExecutePart1();
+var result = Day4.ExecutePart2();
 
 var end = DateTime.Now;
 

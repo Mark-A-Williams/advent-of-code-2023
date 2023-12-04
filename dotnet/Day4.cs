@@ -10,7 +10,26 @@ public class Day4
 
     public static int ExecutePart2()
     {
-        throw new NotImplementedException();
+        var allCards = File.ReadAllLines("../inputs/4.txt")
+            .Select(ParseCardFromLine)
+            .ToList();
+
+        var highestId = allCards.Max(card => card.Id);
+
+        for (int i = 1; i <= highestId; i++)
+        {
+            var countOfThisCard = allCards.Count(c => c.Id == i);
+            var card = allCards.First(c => c.Id == i);
+
+            var cardsToClone = allCards.Where(c => c.Id > i && c.Id <= i + card.MatchingNumbersCount)
+                .GroupBy(c => c.Id)
+                .Select(grouping => grouping.First())
+                .ToList();
+
+            for (int j = 0; j < countOfThisCard; j++) allCards.AddRange(cardsToClone);
+        }
+
+        return allCards.Count;
     }
 
     private static Card ParseCardFromLine(string inputLine)
@@ -37,13 +56,13 @@ public class Day4
 
     private record Card(int Id, ICollection<int> WinningNumbers, ICollection<int> MyNumbers)
     {
-        public int MatchingNumbers { get => WinningNumbers.Count(MyNumbers.Contains); }
+        public int MatchingNumbersCount { get => WinningNumbers.Count(MyNumbers.Contains); }
 
         public int Score
         {
-            get => MatchingNumbers == 0
+            get => MatchingNumbersCount == 0
                 ? 0
-                : Convert.ToInt32(Math.Pow(2, MatchingNumbers - 1));
+                : Convert.ToInt32(Math.Pow(2, MatchingNumbersCount - 1));
         }
     }
 }
