@@ -15,6 +15,7 @@ public class Day4
 
     private static Card ParseCardFromLine(string inputLine)
     {
+        var id = Convert.ToInt32(inputLine.Split(':')[0].Split(' ').Last());
         var numbers = inputLine.Split(':')[1].Split('|');
 
         var winningNumbersText = numbers[0];
@@ -29,11 +30,12 @@ public class Day4
                 .ToHashSet();
 
         return new Card(
+            id,
             GetParsedNumbersFromString(winningNumbersText),
             GetParsedNumbersFromString(myNumbersText));
     }
 
-    private record Card(ICollection<int> WinningNumbers, ICollection<int> MyNumbers)
+    private record Card(int Id, ICollection<int> WinningNumbers, ICollection<int> MyNumbers)
     {
         public int MatchingNumbers { get => WinningNumbers.Count(MyNumbers.Contains); }
 
