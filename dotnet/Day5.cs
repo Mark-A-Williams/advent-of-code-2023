@@ -6,7 +6,8 @@ public class Day5
 {
     public static long ExecutePart1()
     {
-        (var mappingSets, var seedLocations) = ParseInput();
+        var mappingSets = ParseMappingSetsFromInput();
+        var seedLocations = ParseSeedLocationsFromInput();
 
         var lowestLocation = long.MaxValue;
 
@@ -24,16 +25,44 @@ public class Day5
         return lowestLocation;
     }
 
-    public static int ExecutePart2()
+    public static long ExecutePart2()
     {
-        throw new NotImplementedException();
+        var mappingSets = ParseMappingSetsFromInput();
+        var seedRanges = ParseSeedRangesFromInput();
+
+        var lowestLocation = long.MaxValue;
+        var totalSeedLocationCount = seedRanges.Sum(o => o.Length);
+        long locationsSearched = 0;
+
+        foreach (var seedRange in seedRanges)
+        {
+            Console.WriteLine($"Beginning search for seed range with start index {seedRange.Start}");
+            for (var i = 0; i < seedRange.Length; i++)
+            {
+                var seedLocation = seedRange.Start + i;
+                var currentLocation = seedLocation;
+
+                foreach (var mapping in mappingSets)
+                {
+                    currentLocation = mapping.MapSourceToDestination(currentLocation);
+                }
+
+                if (currentLocation < lowestLocation) lowestLocation = currentLocation;
+
+                locationsSearched++;
+                if (locationsSearched % 10_000_000 == 0)
+                {
+                    Console.WriteLine($"Total progress (locations searched): {(decimal)locationsSearched / totalSeedLocationCount * 100}%");
+                }
+            }
+        }
+
+        return lowestLocation;
     }
 
-    private static (ICollection<MappingSet> MappingSets, ICollection<long> SeedLocations) ParseInput()
+    private static ICollection<MappingSet> ParseMappingSetsFromInput()
     {
         var lines = File.ReadAllLines("../inputs/5.txt").Where(o => !string.IsNullOrWhiteSpace(o)).ToArray();
-
-        var seedLocations = lines[0].Split(':')[1].Split(' ').Where(o => !string.IsNullOrWhiteSpace(o)).Select(long.Parse).ToList();
 
         var mappingSets = new List<MappingSet>();
         var rangeMappingsBuffer = new List<RangeMapping>();
@@ -56,8 +85,26 @@ public class Day5
             }
         }
 
-        return (mappingSets, seedLocations);
+        return mappingSets;
     }
+
+    private static ICollection<long> ParseSeedLocationsFromInput()
+        => File.ReadAllLines("../inputs/5.txt")[0]
+            .Split(':')[1]
+            .Split(' ')
+            .Where(o => !string.IsNullOrWhiteSpace(o))
+            .Select(long.Parse)
+            .ToList();
+
+    private static ICollection<(long Start, long Length)> ParseSeedRangesFromInput()
+        => ParseSeedLocationsFromInput()
+            .Chunk(2)
+            .Select(o =>
+            {
+                var chunkContent = o.ToArray();
+                return (chunkContent[0], chunkContent[1]);
+            })
+            .ToList();
 
     private record RangeMapping(long DestinationRangeStart, long SourceRangeStart, long RangeLength);
 
