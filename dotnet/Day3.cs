@@ -52,6 +52,11 @@ public class Day3
 
     public static int ExecutePart2()
     {
+        // Similar approach to part 1...?
+        // Iterate through, looking for * this time
+        // When you find one, check the adjacent 8 characters and try to work out if there are two
+        // separate part numbers there. If there are, you also have to work out what they are,
+        // annoyingly means looking at more than just those 8 characters.
         throw new NotImplementedException();
     }
 
