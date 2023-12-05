@@ -28,36 +28,33 @@ public class Day5
     public static long ExecutePart2()
     {
         var mappingSets = ParseMappingSetsFromInput();
+        var reversedMappingSets = mappingSets.Reverse().ToList();
         var seedRanges = ParseSeedRangesFromInput();
 
-        var lowestLocation = long.MaxValue;
-        var totalSeedLocationCount = seedRanges.Sum(o => o.Length);
-        long locationsSearched = 0;
-
-        foreach (var seedRange in seedRanges)
+        long MapLocationToSeed(long location)
         {
-            Console.WriteLine($"Beginning search for seed range with start index {seedRange.Start}");
-            for (var i = 0; i < seedRange.Length; i++)
+            var result = location;
+            foreach (var mapping in reversedMappingSets)
             {
-                var seedLocation = seedRange.Start + i;
-                var currentLocation = seedLocation;
-
-                foreach (var mapping in mappingSets)
-                {
-                    currentLocation = mapping.MapSourceToDestination(currentLocation);
-                }
-
-                if (currentLocation < lowestLocation) lowestLocation = currentLocation;
-
-                locationsSearched++;
-                if (locationsSearched % 10_000_000 == 0)
-                {
-                    Console.WriteLine($"Total progress (locations searched): {(decimal)locationsSearched / totalSeedLocationCount * 100}%");
-                }
+                result = mapping.MapDestinationToSource(result);
             }
+            return result;
         }
 
-        return lowestLocation;
+        long location = 0;
+        while (true)
+        {
+            var seedLocation = MapLocationToSeed(location);
+
+            if (seedRanges.Any(o => seedLocation >= o.Start && seedLocation < o.Start + o.Length))
+            {
+                return location;
+            }
+
+            location++;
+
+            if (location % 10_000_000 == 0) Console.WriteLine($"Checked {location} locations");
+        }
     }
 
     private static ICollection<MappingSet> ParseMappingSetsFromInput()
@@ -123,6 +120,16 @@ public class Day5
             if (relevantMapping is null) return source;
 
             return source + relevantMapping.DestinationRangeStart - relevantMapping.SourceRangeStart;
+        }
+
+        public long MapDestinationToSource(long destination)
+        {
+            var relevantMapping = RangeMappings
+                .SingleOrDefault(o => destination >= o.DestinationRangeStart && destination < o.DestinationRangeStart + o.RangeLength);
+
+            if (relevantMapping is null) return destination;
+
+            return destination + relevantMapping.SourceRangeStart - relevantMapping.DestinationRangeStart;
         }
     }
 }
