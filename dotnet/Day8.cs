@@ -60,20 +60,23 @@ public class Day8
 
     private static long LeastCommonMultiple(int[] numbers)
     {
-        var foundIt = false;
         var i = 1;
         long result = 0;
         long startNum = numbers.Max();
 
+        bool foundIt;
         do
         {
             long test = startNum * i;
 
-            if (numbers.All(n => test % n == 0))
+            var didWeFindIt = true;
+            foreach (var num in numbers)
             {
-                result = test;
-                foundIt = true;
+                if (test % num != 0) didWeFindIt = false;
             }
+
+            foundIt = didWeFindIt;
+            if (didWeFindIt) result = test;
 
             i++;
         }
