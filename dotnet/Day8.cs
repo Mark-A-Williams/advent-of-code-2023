@@ -13,6 +13,26 @@ public class Day8
         return GetInstructionCountToDestination("AAA", n => n.Id == "ZZZ", nodes, instructions);
     }
 
+    public static long ExecutePart2()
+    {
+        var lines = File.ReadAllLines("../inputs/8.txt");
+        var instructions = lines[0];
+
+        var nodes = lines.Skip(2).Select(ParseInputLine)
+            .ToDictionary(node => node.Id, node => node);
+
+        var spookyNodeGhosts = nodes.Where(n => n.Key[2] == 'A').Select(n => n.Value).ToList();
+
+        var instructionsNeededByGhost = spookyNodeGhosts.Select(ghost => GetInstructionCountToDestination(
+            ghost.Id,
+            node => node.Id[2] == 'Z',
+            nodes,
+            instructions
+        )).ToArray();
+
+        return LeastCommonMultiple(instructionsNeededByGhost);
+    }
+
     private static int GetInstructionCountToDestination(
         string startNodeId,
         Func<Node, bool> hasFinishedPredicate,
@@ -38,47 +58,28 @@ public class Day8
         return instructionsFollowed;
     }
 
-    public static int ExecutePart2()
+    private static long LeastCommonMultiple(int[] numbers)
     {
-        var lines = File.ReadAllLines("../inputs/8.txt");
-        var instructions = lines[0];
+        var foundIt = false;
+        var i = 1;
+        long result = 0;
+        long startNum = numbers.Max();
 
-        var nodes = lines.Skip(2).Select(ParseInputLine)
-            .ToDictionary(node => node.Id, node => node);
-
-        var currentNodes = nodes.Where(n => n.Key[2] == 'A').Select(n => n.Value).ToList();
-        var instructionsFollowed = 0;
-
-        bool areWeThereYet = false;
         do
         {
-            var index = instructionsFollowed % instructions.Length;
-            var instruction = instructions[index];
+            long test = startNum * i;
 
-            List<Node> nextNodes = [];
-
-            Parallel.ForEach(currentNodes, node =>
+            if (numbers.All(n => test % n == 0))
             {
-                nextNodes.Add(instruction == 'L' ? nodes[node.LeftNext] : nodes[node.RightNext]);
-            });
-
-            var numberOfZ = nextNodes.Count(n => n.Id[2] == 'Z');
-
-            if (numberOfZ > 3)
-            {
-                Console.WriteLine($"{instructionsFollowed} instructions in, {numberOfZ} simultaneous Zs");
+                result = test;
+                foundIt = true;
             }
 
-            areWeThereYet = numberOfZ == nextNodes.Count;
-
-            instructionsFollowed++;
-            currentNodes = nextNodes;
-
-            if (instructionsFollowed % 10_000_000 == 0) Console.WriteLine($"{instructionsFollowed} instructions in");
+            i++;
         }
-        while (!areWeThereYet);
+        while (!foundIt);
 
-        return instructionsFollowed;
+        return result;
     }
 
     private static Node ParseInputLine(string line)
