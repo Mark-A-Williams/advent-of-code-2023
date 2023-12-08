@@ -5,7 +5,7 @@ public class Day7
     public static int ExecutePart1()
     {
         var lines = File.ReadAllLines("../inputs/7.txt");
-        var hands = lines.Select(ParseHand);
+        var hands = lines.Select(o => ParseHand(o));
 
         var handsOrderedByRank = hands.OrderByDescending(h => h.Type)
             .ThenBy(h => h.Cards[0])
@@ -21,7 +21,26 @@ public class Day7
         }).Sum();
     }
 
-    private static Hand ParseHand(string input)
+    public static int ExecutePart2()
+    {
+        var lines = File.ReadAllLines("../inputs/7.txt");
+        var hands = lines.Select(o => ParseHand(o, jokersSuck: true));
+
+        var handsOrderedByRank = hands.OrderByDescending(h => h.Type)
+            .ThenBy(h => h.Cards[0])
+            .ThenBy(h => h.Cards[1])
+            .ThenBy(h => h.Cards[2])
+            .ThenBy(h => h.Cards[3])
+            .ThenBy(h => h.Cards[4])
+            .ToList();
+
+        return handsOrderedByRank.Select((hand, index) =>
+        {
+            return (index + 1) * hand.Bid;
+        }).Sum();
+    }
+
+    private static Hand ParseHand(string input, bool jokersSuck = false)
     {
         var split = input.Split(' ');
 
@@ -31,7 +50,7 @@ public class Day7
             return card switch
             {
                 'T' => 10,
-                'J' => 11,
+                'J' => jokersSuck ? 11 : 0,
                 'Q' => 12,
                 'K' => 13,
                 'A' => 14,
@@ -47,10 +66,16 @@ public class Day7
     private static HandType GetHandType(ICollection<int> cards)
     {
         var cardCounts = cards
+            .Where(card => card != 0) // Filter out zeros (Jokers) to apply later
             .GroupBy(o => o)
             .Select(o => o.Count())
             .OrderByDescending(o => o)
             .ToArray();
+
+        // Have to handle 5 jokers!
+        if (cardCounts.Length == 0) return HandType.FiveOfAKind;
+
+        cardCounts[0] += cards.Count(c => c == 0);
 
         if (cardCounts[0] == 5) return HandType.FiveOfAKind;
         if (cardCounts[0] == 4 && cardCounts[1] == 1) return HandType.FourOfAKind;
