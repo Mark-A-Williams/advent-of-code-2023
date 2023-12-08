@@ -10,10 +10,19 @@ public class Day8
         var nodes = lines.Skip(2).Select(ParseInputLine)
             .ToDictionary(node => node.Id, node => node);
 
-        var currentNode = nodes["AAA"];
+        return GetInstructionCountToDestination("AAA", n => n.Id == "ZZZ", nodes, instructions);
+    }
+
+    private static int GetInstructionCountToDestination(
+        string startNodeId,
+        Func<Node, bool> hasFinishedPredicate,
+        Dictionary<string, Node> nodes,
+        string instructions)
+    {
+        var currentNode = nodes[startNodeId];
 
         var instructionsFollowed = 0;
-        while (currentNode.Id != "ZZZ")
+        while (!hasFinishedPredicate(currentNode))
         {
             var index = instructionsFollowed % instructions.Length;
             var instruction = instructions[index];
@@ -47,10 +56,11 @@ public class Day8
             var instruction = instructions[index];
 
             List<Node> nextNodes = [];
-            foreach (var node in currentNodes)
+
+            Parallel.ForEach(currentNodes, node =>
             {
                 nextNodes.Add(instruction == 'L' ? nodes[node.LeftNext] : nodes[node.RightNext]);
-            }
+            });
 
             var numberOfZ = nextNodes.Count(n => n.Id[2] == 'Z');
 
