@@ -5,15 +5,16 @@ public class Day9
     public static long ExecutePart1()
     {
         var lines = File.ReadAllLines("../inputs/9.txt");
-        return lines.Sum(o => GetNextElementInSequence(ParseLine(o)));
+        return lines.Sum(o => ExtrapolateSequence(ParseLine(o), previous: false));
     }
 
     public static long ExecutePart2()
     {
-        throw new NotImplementedException();
+        var lines = File.ReadAllLines("../inputs/9.txt");
+        return lines.Sum(o => ExtrapolateSequence(ParseLine(o), previous: true));
     }
 
-    private static long GetNextElementInSequence(List<long> sequence)
+    private static long ExtrapolateSequence(List<long> sequence, bool previous)
     {
         if (sequence.Distinct().Count() == 1)
         {
@@ -22,8 +23,11 @@ public class Day9
         }
 
         var gradient = GetGradient(sequence);
-        var nextGradient = GetNextElementInSequence(gradient);
-        return sequence[^1] + nextGradient;
+        var nextGradient = ExtrapolateSequence(gradient, previous);
+
+        return previous
+            ? sequence[0] - nextGradient
+            : sequence[^1] + nextGradient;
     }
 
     private static List<long> GetGradient(List<long> sequence)
