@@ -3,16 +3,10 @@
 public class Day9
 {
     public static long ExecutePart1()
-    {
-        var lines = File.ReadAllLines("../inputs/9.txt");
-        return lines.Sum(o => ExtrapolateSequence(ParseLine(o), previous: false));
-    }
+        => File.ReadAllLines("../inputs/9.txt").Sum(o => ExtrapolateSequence(ParseLine(o), previous: false));
 
     public static long ExecutePart2()
-    {
-        var lines = File.ReadAllLines("../inputs/9.txt");
-        return lines.Sum(o => ExtrapolateSequence(ParseLine(o), previous: true));
-    }
+        => File.ReadAllLines("../inputs/9.txt").Sum(o => ExtrapolateSequence(ParseLine(o), previous: true));
 
     private static long ExtrapolateSequence(List<long> sequence, bool previous)
     {
@@ -31,15 +25,7 @@ public class Day9
     }
 
     private static List<long> GetGradient(List<long> sequence)
-    {
-        // Linq SLOW
-        List<long> result = [];
-        for (int i = 0; i < sequence.Count - 1; i++)
-        {
-            result.Add(sequence[i + 1] - sequence[i]);
-        }
-        return result;
-    }
+        => sequence.Zip(sequence.Skip(1)).Select(x => x.Second - x.First).ToList();
 
     private static List<long> ParseLine(string line)
         => line.Split(' ').Select(long.Parse).ToList();
